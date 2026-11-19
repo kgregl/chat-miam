@@ -42,11 +42,19 @@ window.DB = [
  ["Melon","moderation","Non toxique, petit morceau sans peau ni pépins.",[]],
  ["Pastèque","moderation","Sans pépins ni peau, en petit morceau.",[]],
  ["Agrumes (orange, citron, pamplemousse)","moderation","Les huiles de la peau irritent ; la plupart des chats détestent. Mieux vaut éviter.",["orange","citron","clémentine","mandarine","pamplemousse"]],
- ["Croquettes pour chien","moderation","Pas toxiques, mais pas adaptées (manque de taurine). OK si ton chat en vole un peu, pas en repas.",["croquettes chien","pâtée chien"]],
+ ["Croquettes / pâtée pour chien","moderation","Pas toxiques, mais pas adaptées : pas assez de taurine, de vitamine A et de protéines pour un chat. OK s'il en vole un peu, jamais en repas régulier.",["croquettes chien","pâtée chien","aliment chien"]],
  ["Pain","moderation","Non toxique cuit, mais sans intérêt nutritionnel. Un petit bout de mie au plus.",["mie de pain","baguette"]],
  ["Pâtes cuites nature","moderation","Non toxiques, mais inutiles pour un carnivore ; sans sauce.",["pâtes","pates","spaghetti"]],
  ["Jambon blanc","moderation","Moins pire que les autres charcuteries mais très salé. Exceptionnellement, une lamelle sans couenne.",["jambon"]],
  ["Noix, amandes, cacahuètes","moderation","Très grasses, risque d'étouffement et de pancréatite. À éviter.",["noix","amande","amandes","cacahuète","cacahuete","noisette","pistache"]],
+ // ---------- PRODUITS POUR CHAT ----------
+ ["Croquettes pour chat","ok","Conçues pour les chats. Si c'est un aliment « complet », elles peuvent constituer tout le repas, à la ration indiquée selon le poids.",["croquettes","croquette","croquettes chat"]],
+ ["Pâtée pour chat","ok","Conçue pour les chats et riche en eau, ce qui aide les reins et la vessie. Vérifie si c'est un aliment « complet » ou « complémentaire ».",["pâtée","patee","sachet fraîcheur","boîte pour chat","terrine pour chat"]],
+ ["Friandises pour chat","moderation","Aliment « complémentaire » : pas plus d'environ 10 % de ce que mange ton chat par jour, sinon prise de poids.",["friandise","friandises","snack chat","tube crémeux","churu"]],
+ ["Lait pour chat","moderation","Version appauvrie en lactose, mieux tolérée que le lait de vache, mais c'est une friandise : pas à volonté, et jamais à la place de l'eau.",["lait chat","lait pour chaton"]],
+ ["Aliment vétérinaire (Renal, Urinary…)","moderation","Formulé pour une maladie précise : à donner uniquement sur conseil du vétérinaire, il peut être déséquilibré pour un chat en bonne santé.",["renal","urinary","prescription diet","aliment veterinaire","aliment diététique"]],
+ ["Alimentation crue (BARF) pour chat","moderation","Risque de bactéries (salmonelle, listeria) pour le chat et la maison, et ration facile à déséquilibrer. Seulement avec un vétérinaire qui suit.",["barf","viande crue chat"]],
+ ["Croquettes pour chaton","moderation","OK pour un chaton (jusqu'à 12 mois environ). Pour un adulte, trop riches : risque de surpoids.",["chaton","kitten","junior","babycat"]],
  // ---------- OK ----------
  ["Poulet cuit","ok","Excellent : protéine maigre. Cuit, nature, sans peau, sans os, sans assaisonnement.",["poulet","blanc de poulet"]],
  ["Dinde cuite","ok","Bonne protéine maigre. Nature, sans os ni peau.",["dinde"]],
@@ -87,4 +95,11 @@ window.RULES = [
  ["moderation",/\b(epices?|piment|poivre|curry|paprika|moutarde)\b/,"épices"],
  ["moderation",/\b(sucre|sirop de glucose|dextrose|fructose)\b/,"sucre"],
  ["moderation",/\b(noix|noisettes?|amandes?|cacahuetes?|arachides?|pistaches?)\b/,"fruits à coque"],
+];
+
+// Règles spécifiques aux aliments pour animaux
+window.PET_RULES = [
+ ["interdit",/\b(propylene glycol|propane 1 2 diol|e ?1520)\b/,"propylène glycol (E1520) : interdit dans les aliments pour chats en Europe, il abîme les globules rouges"],
+ ["moderation",/\b(ethoxyquine?|e ?324)\b/,"éthoxyquine (E324) : conservateur dont l'autorisation est suspendue dans l'UE"],
+ ["moderation",/\b(cru|crue|crus|barf|raw)\b/,"aliment cru : risque bactérien (salmonelle, listeria)"],
 ];

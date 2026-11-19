@@ -55,3 +55,6 @@ input[type=search],input[type=text],input[type=password]{width:100%;padding:14px
 a{color:var(--accent)}
 .err{color:var(--no)}
 .hidden{display:none!important}
+.tag{display:inline-block;font-size:.78rem;font-weight:600;padding:3px 9px;border-radius:99px;border:1px solid currentColor;color:var(--muted);margin-bottom:8px}
+.alert{background:var(--no-bg);border:2px solid var(--no);border-radius:12px;padding:10px 12px;margin:6px 0 10px;line-height:1.45}
+.alert b{color:var(--no)}

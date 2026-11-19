@@ -3,6 +3,8 @@
 Appli Android pour savoir si un aliment peut être donné à un chat.
 
 - **Scanner** : code-barres en direct avec la caméra → produit cherché sur Open Food Facts → ingrédients analysés (oignon, ail, chocolat, xylitol, raisin, alcool, caféine, sel…).
+- **Aliments pour chats** : croquettes, pâtées, friandises, lait, aliments vétérinaires, formules chaton, aliments pour chien (via Open Pet Food Facts), avec repérage du propylène glycol, de l’éthoxyquine, des ingrédients toxiques.
+- **Rappels** : vérification du code-barres dans RappelConso (rappels officiels en France).
 - **Photo** : reconnaissance d'un aliment ou d'une liste d'ingrédients par Claude (clé API Anthropic à saisir dans ⚙️, optionnel).
 - **Chercher** : base intégrée de ~65 aliments (interdit / à limiter / OK), fonctionne hors ligne.
 
