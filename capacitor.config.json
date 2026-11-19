@@ -1,0 +1,8 @@
+{
+  "appId": "fr.greg.chatmiam",
+  "appName": "Chat Miam",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}

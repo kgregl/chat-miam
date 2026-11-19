@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chat Miam</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <h1>🐱 Mon chat peut-il manger ça ?</h1>
+
+  <div class="tabs">
+    <button data-tab="scan" class="on">▮▯▮ Scanner</button>
+    <button data-tab="photo">📷 Photo</button>
+    <button data-tab="search">🔎 Chercher</button>
+    <button data-tab="settings" aria-label="Réglages">⚙️</button>
+  </div>
+
+  <!-- SCANNER EN DIRECT -->
+  <section id="tab-scan" class="card">
+    <div id="camBox" class="cam hidden">
+      <video id="video" playsinline muted></video>
+      <div class="aim"></div>
+    </div>
+    <button id="scanBtn" class="big">▮▯▮ Scanner un code-barres</button>
+    <button id="stopBtn" class="big alt hidden">Arrêter la caméra</button>
+    <div class="row">
+      <input id="codeInput" type="text" inputmode="numeric" placeholder="ou tape le code (ex : 3017620422003)">
+      <button id="codeGo" class="small">OK</button>
+    </div>
+    <p class="hint">Le produit est cherché dans Open Food Facts, puis ses ingrédients sont analysés pour ton chat.</p>
+  </section>
+
+  <!-- PHOTO (Claude) -->
+  <section id="tab-photo" class="card hidden">
+    <label class="big" for="photoInput">📷 Prendre une photo de l'aliment</label>
+    <input id="photoInput" type="file" accept="image/*" capture="environment" class="hidden">
+    <p class="hint">Fruit, légume, reste de repas, ou liste d'ingrédients d'un emballage. L'analyse utilise Claude : il faut une clé API dans ⚙️.</p>
+    <img id="photoPreview" class="preview hidden" alt="">
+  </section>
+
+  <!-- RECHERCHE -->
+  <section id="tab-search" class="card hidden">
+    <input id="q" type="search" placeholder="ex : banane, jambon, fromage, ail…" autocomplete="off">
+    <div class="filters">
+      <button data-f="all" class="on">Tout</button>
+      <button data-f="interdit">🔴 Interdit</button>
+      <button data-f="moderation">🟠 À limiter</button>
+      <button data-f="ok">🟢 OK</button>
+    </div>
+    <ul id="list" class="list"></ul>
+    <button id="askBtn" class="big alt hidden">Pas dans la liste ? Demander à Claude</button>
+  </section>
+
+  <!-- RÉGLAGES -->
+  <section id="tab-settings" class="card hidden">
+    <h3>Analyse par photo (optionnel)</h3>
+    <p class="hint">Pour reconnaître un aliment en photo, l'appli utilise Claude via l'API Anthropic. Crée une clé sur console.anthropic.com (payant à l'usage, quelques centimes par analyse) et colle-la ici. Elle reste sur ton téléphone.</p>
+    <input id="apiKey" type="password" placeholder="sk-ant-…" autocomplete="off">
+    <button id="saveKey" class="big" style="margin-top:10px">Enregistrer</button>
+    <p id="keyState" class="hint"></p>
+    <p class="hint">Le scanner de code-barres et la recherche fonctionnent sans clé.</p>
+  </section>
+
+  <div id="result"></div>
+
+  <section class="card urgence">
+    <b>🚨 Ton chat a avalé quelque chose de dangereux ?</b><br>
+    Ne le fais pas vomir toi-même. Appelle ton vétérinaire ou un centre antipoison vétérinaire :<br>
+    • CNITV Lyon : <a href="tel:+33478871040">04 78 87 10 40</a><br>
+    • CAPAE-Ouest Nantes : <a href="tel:+33240687740">02 40 68 77 40</a><br>
+    <span class="muted">Repères généraux, ne remplace pas l'avis d'un vétérinaire (surtout si ton chat est malade : reins, diabète, urinaire…).</span>
+  </section>
+</main>
+<script src="zxing.min.js"></script>
+<script src="db.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
