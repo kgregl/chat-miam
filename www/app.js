@@ -361,7 +361,7 @@ $("foodInput").onchange = async e => {
   // Pas d'aliment reconnu avec certitude (souvent un pot ou un emballage) : on lit l'étiquette
   loading("Je lis l'étiquette…");
   let text = "";
-  try { text = await withTimeout(readText(f), 90000); } catch (x) { console.error(x); }
+  try { text = (await withTimeout(readText(f, null, "11"), 90000)).text; } catch (x) { console.error(x); }
   const m = matchText(text);
   if (m.length) {
     const r = m[0].row;
@@ -412,16 +412,37 @@ $("ingrInput").onchange = async e => {
   const f = e.target.files[0]; e.target.value = ""; if (!f) return;
   showPreview(f);
   loading("Lecture du texte…");
-  let text;
-  try { text = await withTimeout(readText(f, pct => { const r = $("result").querySelector(".big"); if (r) r.innerHTML = `<span class="spinner"></span> Lecture du texte… ${pct} %`; }), 120000); }
-  catch (x) { error("La lecture de texte n'a pas pu démarrer sur ce téléphone."); return; }
-  const clean = text.replace(/\s+/g, " ").trim();
-  if (clean.length < 15) { error("Je n'arrive pas à lire de texte sur cette photo. Rapproche-toi, évite les reflets et prends la liste bien à plat."); return; }
+  const prog = (lbl) => pct => { const r = $("result").querySelector(".big"); if (r) r.innerHTML = `<span class="spinner"></span> ${lbl} ${pct} %`; };
+  let best = {text: "", conf: 0}, score = 0;
+  try {
+    // 1er essai : mise en page automatique ; 2e essai : texte épars (emballages)
+    for (const [psm, lbl] of [["3", "Lecture du texte…"], ["11", "2e essai de lecture…"]]) {
+      const r = await withTimeout(readText(f, prog(lbl), psm), 120000);
+      const sc = labelScore(r.text);
+      if (sc > score) { best = r; score = sc; }
+      if (score >= 4) break;
+    }
+  } catch (x) { console.error(x); }
+  const clean = best.text.replace(/\s+/g, " ").trim();
+  // Lecture ratée : JAMAIS de verdict OK sur un texte illisible
+  if (score < 3) {
+    $("result").innerHTML = `<div class="verdict inconnu"><span class="badge">ILLISIBLE</span>
+      <h2>Je n'ai pas réussi à lire la liste</h2>
+      <p>Je ne peux donc rien conclure : <b>ce n'est pas un feu vert.</b></p>
+      <p><b>Pour réussir la photo :</b></p>
+      <ul><li>rapproche-toi pour que la liste d'ingrédients <b>remplisse presque tout l'écran</b> ;</li>
+      <li>tiens l'emballage bien à plat, sans pli ni reflet ;</li>
+      <li>prends la photo à la lumière du jour, bien nette (touche l'écran pour faire la mise au point).</li></ul>
+      <p class="hint">Plus simple : scanne le code-barres du produit (onglet Scanner).${clean ? " Texte lu : « " + esc(clean.slice(0, 120)) + " »" : ""}</p></div>`;
+    return;
+  }
   const p = {product_name: "Liste d'ingrédients photographiée", generic_name_fr: clean, ingredients_text_fr: clean};
   const kind = petKind(p);
   if (kind) p._pet = true;
   const v = kind ? analysePetFood(p, kind) : analyseProduct(p);
-  v.note = "Texte lu sur la photo (peut contenir des erreurs de lecture) : « " + (clean.length > 220 ? clean.slice(0, 220) + "…" : clean) + " »";
+  v.noHistory = true;
+  if (v.verdict === "ok") v.conseil = "Vérifie quand même que tout le texte a bien été lu (ci-dessous). " + (v.conseil || "");
+  v.note = "Texte lu sur la photo (peut contenir des erreurs de lecture) : « " + (clean.length > 300 ? clean.slice(0, 300) + "…" : clean) + " »";
   showVerdict(v);
 };
 

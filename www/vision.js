@@ -115,16 +115,37 @@ async function getOcr(onProgress){
   return _ocr;
 }
 
-// Prépare l'image (niveaux de gris, contraste) et lit le texte
-async function readText(file, onProgress){
+// Prépare l'image (niveaux de gris, bonne résolution) et lit le texte.
+// psm : mode de découpage Tesseract ("3" = page automatique, "11" = texte épars, utile sur les emballages)
+async function readText(file, onProgress, psm){
   const img = await fileToImage(file);
-  const max = 2000, s = Math.min(1, max / Math.max(img.width, img.height));
+  const long = Math.max(img.width, img.height);
+  // Les listes d'ingrédients sont écrites petit : on garde une grande résolution (et on agrandit les petites photos)
+  const s = long > 3200 ? 3200 / long : (long < 1600 ? 1600 / long : 1);
   const c = document.createElement("canvas");
   c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
   const ctx = c.getContext("2d");
-  ctx.filter = "grayscale(1) contrast(1.4)";
+  ctx.filter = "grayscale(1)";
   ctx.drawImage(img, 0, 0, c.width, c.height);
   const w = await getOcr(onProgress);
+  await w.setParameters({tessedit_pageseg_mode: psm || "3"});
   const r = await w.recognize(c);
-  return (r.data && r.data.text) || "";
+  return {text: (r.data && r.data.text) || "", conf: (r.data && r.data.confidence) || 0};
+}
+
+// Vocabulaire d'étiquette : sert à vérifier que la lecture a vraiment réussi
+const LABEL_WORDS = new Set(("ingredients ingredient eau sel sucre sucres huile huiles graisse graisses vegetale vegetales vegetal farine ble amidon modifie "
+ + "arome aromes naturel naturels extrait extraits levure lait poudre ecreme entier creme beurre oeuf oeufs viande viandes poulet boeuf porc dinde canard "
+ + "poisson poissons thon saumon legumes legume carottes tomate tomates oignon oignons ail echalote echalotes persil epices epice poivre curcuma "
+ + "conservateur conservateurs emulsifiant emulsifiants lecithine lecithines soja colza tournesol palme olive mais riz pomme pommes jus citron "
+ + "acidifiant acide citrique antioxydant colorant colorants epaississant gelifiant stabilisant exhausteur gout glutamate dextrose maltodextrine "
+ + "sirop glucose fructose cacao chocolat noisettes amandes arachide cereales avoine orge seigle fibres proteines mineraux vitamines "
+ + "sous produits animaux origine animale vegetale traces peut contenir allergenes fromage yaourt miel vinaigre moutarde").split(" "));
+
+// Renvoie le nombre de mots d'étiquette reconnus (0-1-2 = lecture ratée)
+function labelScore(text){
+  const words = (norm(text).match(/[a-z]{3,}/g) || []);
+  let hits = 0;
+  for (const wd of words) if (LABEL_WORDS.has(wd) || LABEL_WORDS.has(wd.replace(/s$/, ""))) hits++;
+  return hits;
 }

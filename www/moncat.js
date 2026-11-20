@@ -312,7 +312,7 @@ $("plantInput").onchange = async e => {
   // Sans clé : on lit l'étiquette du pot
   loading("Je lis l'étiquette de la plante…");
   let text = "";
-  try { text = await withTimeout(readText(f), 90000); } catch (x) {}
+  try { text = (await withTimeout(readText(f, null, "11"), 90000)).text; } catch (x) {}
   const m = matchText(text).filter(x => x.row[0].startsWith("Plante : "));
   if (m.length) {
     const r = m[0].row;
