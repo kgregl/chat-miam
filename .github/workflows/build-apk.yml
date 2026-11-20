@@ -39,6 +39,9 @@ jobs:
           # Icône de l'appli (générée depuis resources/icon*.svg)
           cp -r resources/android/res/. android/app/src/main/res/
           npx cap sync android
+          # Numéro de version qui augmente à chaque compilation (permet la mise à jour)
+          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/; s/versionName \"[^\"]*\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
+          grep -E "versionCode|versionName" android/app/build.gradle
 
       - name: Clé de signature fixe (mises à jour sans désinstaller)
         run: |
@@ -50,7 +53,16 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
-          cp app/build/outputs/apk/debug/app-debug.apk ../ChatMiam.apk
+          # Signature toujours avec la même clé (sinon Android refuse la mise à jour)
+          APKSIGNER=$(ls -d $ANDROID_HOME/build-tools/*/apksigner | sort -V | tail -1)
+          $APKSIGNER sign --ks ../signing/debug.keystore --ks-pass pass:android --key-pass pass:android --ks-key-alias androiddebugkey --out ../ChatMiam.apk app/build/outputs/apk/debug/app-debug.apk
+          $APKSIGNER verify --print-certs ../ChatMiam.apk | tee ../cert.txt
+
+      - name: Texte de la release
+        run: |
+          echo "Ouvre cette page sur ton téléphone Android et télécharge ChatMiam.apk." > release.md
+          echo "" >> release.md
+          echo "Signature : $(grep -m1 'SHA-256' cert.txt)" >> release.md
 
       - uses: actions/upload-artifact@v4
         with:
@@ -62,5 +74,5 @@ jobs:
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: Chat Miam v1.0.${{ github.run_number }}
-          body: Ouvre cette page sur ton téléphone Android et télécharge ChatMiam.apk.
+          body_path: release.md
           files: ChatMiam.apk
