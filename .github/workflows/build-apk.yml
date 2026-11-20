@@ -33,6 +33,8 @@ jobs:
           npx cap add android
           # Autorisation caméra pour le scanner de code-barres
           sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n</manifest>#' android/app/src/main/AndroidManifest.xml
+          # Icône de l'appli (générée depuis resources/icon*.svg)
+          cp -r resources/android/res/. android/app/src/main/res/
           npx cap sync android
 
       - name: Compiler l'APK

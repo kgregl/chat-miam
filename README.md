@@ -20,6 +20,7 @@ npx cap add android
 npx cap sync android
 cd android && ./gradlew assembleDebug
 ```
+Copier l'icône : `cp -r resources/android/res/. android/app/src/main/res/` (sources SVG dans `resources/`).
 (Ajouter `<uses-permission android:name="android.permission.CAMERA" />` dans `android/app/src/main/AndroidManifest.xml`.)
 
 Stack : Capacitor 8 + HTML/JS, ZXing, API Open Food Facts.
