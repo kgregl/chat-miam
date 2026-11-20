@@ -184,7 +184,14 @@ $("histClear").onclick = () => { saveJ("historique", []); renderLists(); syncRun
    3. ALERTES DE RAPPEL (au lancement + notifications en arrière-plan)
    ===================================================================== */
 const RUNNER_LABEL = "fr.greg.chatmiam.rappels";
-const BR = (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform() && Capacitor.registerPlugin) ? Capacitor.registerPlugin("BackgroundRunner") : null;
+// Appels directs aux plugins natifs (l'appli n'embarque pas @capacitor/core, seulement le pont natif)
+const IS_NATIVE = !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform() && Capacitor.nativePromise);
+const native = (plugin, method, opts) => Capacitor.nativePromise(plugin, method, opts || {});
+const BR = IS_NATIVE ? {
+  dispatchEvent: o => native("BackgroundRunner", "dispatchEvent", o),
+  checkPermissions: () => native("BackgroundRunner", "checkPermissions"),
+  requestPermissions: o => native("BackgroundRunner", "requestPermissions", o),
+} : null;
 function watchedCodes(){
   const codes = [...loadJ("favoris", []), ...loadJ("historique", [])].map(x => x.code).filter(Boolean);
   return [...new Set(codes)].slice(0, 100);
@@ -251,9 +258,9 @@ function plantFromGenus(genus, family){
 }
 async function plantnetIdentify(b64, key){
   const url = `https://my-api.plantnet.org/v2/identify/all?api-key=${encodeURIComponent(key)}&lang=fr&nb-results=3&include-related-images=false`;
-  if (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()) {
-    const Http = Capacitor.registerPlugin("CapacitorHttp");
-    const r = await Http.request({url, method: "POST", headers: {"Content-Type": "multipart/form-data"}, dataType: "formData",
+  if (IS_NATIVE) {
+    const r = await native("CapacitorHttp", "request", {url, method: "POST", headers: {"Content-Type": "multipart/form-data"}, dataType: "formData",
+      connectTimeout: 30000, readTimeout: 45000,
       data: [{key: "organs", value: "auto", type: "string"}, {key: "images", value: b64, type: "base64File", fileName: "plante.jpg", contentType: "image/jpeg"}]});
     return {status: r.status, data: typeof r.data === "string" ? JSON.parse(r.data || "{}") : r.data};
   }
@@ -294,7 +301,11 @@ $("plantInput").onchange = async e => {
         infos: [...(best.score < 0.4 ? ["Identification peu sûre : vérifie avec une autre photo (feuille ou fleur bien nette)."] : []),
                 ...(others.length ? ["Autres possibilités : " + others.join(" ; ")] : [])],
         note: `Confiance : ${Math.round(best.score * 100)} %. ${PLANTNET_CREDIT}`});
-    } catch (x) { error("Pl@ntNet ne répond pas (pas de connexion ?). Cherche la plante par son nom dans l'onglet Chercher."); }
+    } catch (x) {
+      console.error(x);
+      const d = (x && (x.message || x.errorMessage || x.code)) || String(x);
+      error("Pl@ntNet ne répond pas (" + d + "). Vérifie ta connexion, ou cherche la plante par son nom dans l'onglet Chercher.");
+    }
     return;
   }
   // Sans clé : on lit l'étiquette du pot
