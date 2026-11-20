@@ -33,11 +33,13 @@
     <p class="hint">Aliments humains <b>et</b> croquettes, pâtées, friandises pour chat : le produit est cherché dans Open Food Facts et Open Pet Food Facts, ses ingrédients sont analysés, et l'appli vérifie s'il fait l'objet d'un rappel officiel (RappelConso).</p>
   </section>
 
-  <!-- PHOTO (Claude) -->
+  <!-- PHOTO (reconnaissance sur le téléphone) -->
   <section id="tab-photo" class="card hidden">
-    <label class="big" for="photoInput">📷 Prendre une photo de l'aliment</label>
-    <input id="photoInput" type="file" accept="image/*" capture="environment" class="hidden">
-    <p class="hint">Fruit, légume, reste de repas, ou liste d'ingrédients d'un emballage. L'analyse utilise Claude : il faut une clé API dans ⚙️.</p>
+    <label class="big" for="foodInput">🍌 Photo d'un aliment</label>
+    <input id="foodInput" type="file" accept="image/*" capture="environment" class="hidden">
+    <label class="big alt" for="ingrInput">📄 Photo d'une liste d'ingrédients</label>
+    <input id="ingrInput" type="file" accept="image/*" capture="environment" class="hidden">
+    <p class="hint">Tout se passe sur ton téléphone, sans Internet et gratuitement. Pour un aliment, cadre-le seul, en gros plan. Pour une liste d'ingrédients, prends-la bien à plat, nette et lisible.</p>
     <img id="photoPreview" class="preview hidden" alt="">
   </section>
 
@@ -56,12 +58,12 @@
 
   <!-- RÉGLAGES -->
   <section id="tab-settings" class="card hidden">
-    <h3>Analyse par photo (optionnel)</h3>
-    <p class="hint">Pour reconnaître un aliment en photo, l'appli utilise Claude via l'API Anthropic. Crée une clé sur console.anthropic.com (payant à l'usage, quelques centimes par analyse) et colle-la ici. Elle reste sur ton téléphone.</p>
+    <h3>Analyse par Claude (optionnel)</h3>
+    <p class="hint">La reconnaissance photo marche déjà sans clé, sur ton téléphone. Si tu veux une analyse plus précise par Claude (plats cuisinés, aliments rares), l'appli peut utiliser l'API Anthropic. Crée une clé sur console.anthropic.com (payant à l'usage, quelques centimes par analyse) et colle-la ici. Elle reste sur ton téléphone.</p>
     <input id="apiKey" type="password" placeholder="sk-ant-…" autocomplete="off">
     <button id="saveKey" class="big" style="margin-top:10px">Enregistrer</button>
     <p id="keyState" class="hint"></p>
-    <p class="hint">Le scanner de code-barres et la recherche fonctionnent sans clé.</p>
+    <p class="hint">Sans clé, tout le reste fonctionne : scanner, photo, recherche.</p>
   </section>
 
   <div id="result"></div>
@@ -75,7 +77,11 @@
   </section>
 </main>
 <script src="zxing.min.js"></script>
+<script src="lib/tf.min.js"></script>
+<script src="lib/mobilenet.min.js"></script>
+<script src="lib/tesseract.min.js"></script>
 <script src="db.js"></script>
+<script src="vision.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

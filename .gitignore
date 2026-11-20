@@ -2,3 +2,5 @@ node_modules/
 /android/
 www/zxing.min.js
 *.apk
+www/lib/
+www/model/

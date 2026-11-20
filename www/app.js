@@ -322,15 +322,75 @@ function toJpegB64(file, max = 1280){
   });
 }
 
-$("photoInput").onchange = async e => {
-  const f = e.target.files[0]; if (!f) return;
-  $("photoPreview").src = URL.createObjectURL(f); $("photoPreview").classList.remove("hidden");
-  loading("Claude regarde ta photo…");
-  try {
-    const b64 = await toJpegB64(f);
-    showVerdict(await askClaude("Voici la photo de l'aliment (ou de son emballage / sa liste d'ingrédients). Identifie-le et donne ton verdict.", b64));
-  } catch (x) { error(claudeErr(x)); }
-  e.target.value = "";
+function showPreview(f){ $("photoPreview").src = URL.createObjectURL(f); $("photoPreview").classList.remove("hidden"); }
+
+/* Photo d'un aliment : MobileNet sur le téléphone */
+$("foodInput").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  showPreview(f);
+  loading(_mobilenet ? "Je regarde ta photo…" : "Chargement du modèle (la 1re fois)…");
+  let guesses;
+  try { guesses = await classifyFood(f); }
+  catch (x) { error("La reconnaissance d'image n'a pas pu démarrer sur ce téléphone. Utilise l'onglet Chercher."); return; }
+  const best = guesses[0];
+  if (!best || best.prob < 0.12 || !best.dbName) {
+    showUnknown(guesses, f); return;
+  }
+  const r = DB.find(x => x[0] === best.dbName);
+  showVerdict({aliment: best.label, verdict: r[1], raison: r[2],
+    note: `Reconnu sur la photo avec ${Math.round(best.prob * 100)} % de confiance.`});
+  addAlternatives(guesses.slice(1), f);
+};
+
+function showUnknown(guesses, file){
+  const opts = guesses.filter(g => g.dbName).slice(0, 4);
+  $("result").innerHTML = `<div class="verdict inconnu"><span class="badge">INCERTAIN</span>
+    <h2>Je ne suis pas sûr de reconnaître cet aliment</h2>
+    ${opts.length ? `<p>C'est peut-être :</p><div class="chips">${opts.map(o => `<button data-db="${esc(o.dbName)}" data-l="${esc(o.label)}">${esc(o.label)}</button>`).join("")}</div>` : ""}
+    <p class="hint">La reconnaissance hors ligne connaît surtout des fruits, légumes et plats courants. Sinon, tape le nom dans l'onglet Chercher.</p>
+    ${store.get("apiKey") ? `<button id="claudeTry" class="big alt">Demander à Claude</button>` : ""}</div>`;
+  bindChips(); bindClaude(file);
+}
+function addAlternatives(rest, file){
+  const opts = rest.filter(g => g.dbName).slice(0, 3);
+  const box = document.createElement("div"); box.className = "card";
+  box.innerHTML = `${opts.length ? `<p class="hint" style="margin-top:0">Ce n'est pas ça ? C'est peut-être :</p><div class="chips">${opts.map(o => `<button data-db="${esc(o.dbName)}" data-l="${esc(o.label)}">${esc(o.label)}</button>`).join("")}</div>` : ""}
+    <p class="hint">Sinon, cherche-le par son nom dans l'onglet Chercher.</p>
+    ${store.get("apiKey") ? `<button id="claudeTry" class="big alt">Demander à Claude</button>` : ""}`;
+  $("result").appendChild(box);
+  bindChips(); bindClaude(file);
+}
+function bindChips(){
+  $("result").querySelectorAll(".chips button").forEach(b => b.onclick = () => {
+    const r = DB.find(x => x[0] === b.dataset.db);
+    showVerdict({aliment: b.dataset.l, verdict: r[1], raison: r[2]});
+  });
+}
+function bindClaude(file){
+  const b = $("claudeTry"); if (!b) return;
+  b.onclick = async () => {
+    loading("Claude regarde ta photo…");
+    try { showVerdict(await askClaude("Voici la photo de l'aliment (ou de son emballage / sa liste d'ingrédients). Identifie-le et donne ton verdict.", await toJpegB64(file))); }
+    catch (x) { error(claudeErr(x)); }
+  };
+}
+
+/* Photo d'une liste d'ingrédients : lecture du texte sur le téléphone */
+$("ingrInput").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  showPreview(f);
+  loading("Lecture du texte…");
+  let text;
+  try { text = await readText(f, pct => { const r = $("result").querySelector(".big"); if (r) r.innerHTML = `<span class="spinner"></span> Lecture du texte… ${pct} %`; }); }
+  catch (x) { error("La lecture de texte n'a pas pu démarrer sur ce téléphone."); return; }
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length < 15) { error("Je n'arrive pas à lire de texte sur cette photo. Rapproche-toi, évite les reflets et prends la liste bien à plat."); return; }
+  const p = {product_name: "Liste d'ingrédients photographiée", generic_name_fr: clean, ingredients_text_fr: clean};
+  const kind = petKind(p);
+  if (kind) p._pet = true;
+  const v = kind ? analysePetFood(p, kind) : analyseProduct(p);
+  v.note = "Texte lu sur la photo (peut contenir des erreurs de lecture) : « " + (clean.length > 220 ? clean.slice(0, 220) + "…" : clean) + " »";
+  showVerdict(v);
 };
 
 $("askBtn").onclick = async () => {

@@ -27,6 +27,7 @@ window.DB = [
  ["Huiles essentielles","interdit","Le foie du chat ne les élimine pas : très toxiques (tea tree, eucalyptus, agrumes…).",["huile essentielle"]],
  ["Rhubarbe","interdit","Riche en oxalates, toxique pour les reins.",[]],
  ["Gâteaux, bonbons, desserts","interdit","Sucre, chocolat, xylitol possibles : aucun intérêt et des risques.",["gâteau","gateau","bonbon","biscuit","dessert"]],
+ ["Figue","interdit","Le figuier (fruit, feuilles, sève) contient des substances irritantes pour les chats : troubles digestifs et irritations.",["figues","figue sèche"]],
  // ---------- À LIMITER ----------
  ["Lait de vache","moderation","La plupart des chats adultes digèrent mal le lactose : diarrhée. Préférer de l'eau ou du lait spécial chat.",["lait","crème","creme"]],
  ["Fromage","moderation","Riche en gras et en sel, lactose. Un tout petit dé occasionnel au plus.",["gruyère","emmental","comté","mozzarella"]],
@@ -47,6 +48,16 @@ window.DB = [
  ["Pâtes cuites nature","moderation","Non toxiques, mais inutiles pour un carnivore ; sans sauce.",["pâtes","pates","spaghetti"]],
  ["Jambon blanc","moderation","Moins pire que les autres charcuteries mais très salé. Exceptionnellement, une lamelle sans couenne.",["jambon"]],
  ["Noix, amandes, cacahuètes","moderation","Très grasses, risque d'étouffement et de pancréatite. À éviter.",["noix","amande","amandes","cacahuète","cacahuete","noisette","pistache"]],
+ ["Ananas","moderation","Non toxique, mais sucré et acide. Un tout petit morceau de chair, sans peau ni cœur.",[]],
+ ["Grenade","moderation","Pas connue comme toxique, mais acide et peu digeste. Sans intérêt pour un chat : mieux vaut éviter.",[]],
+ ["Fruits exotiques","moderation","Peu de données sur leur effet chez le chat : mieux vaut éviter.",["mangue","papaye","litchi","kiwi"]],
+ ["Champignons","moderation","Champignons du commerce (de Paris) : non toxiques cuits nature, mais sans intérêt. Les champignons sauvages, eux, sont interdits.",["champignon de paris"]],
+ ["Chou","moderation","Cuit et en petite quantité seulement : il donne des gaz.",["chou rouge","chou blanc","chou de bruxelles"]],
+ ["Maïs","moderation","Quelques grains cuits nature, jamais l'épi (risque d'occlusion).",["épi de maïs","mais"]],
+ ["Pomme de terre cuite","moderation","Cuite et nature, non toxique, mais inutile pour un chat. La purée contient souvent lait, beurre et sel : à éviter.",["purée","puree","patate cuite","frites"]],
+ ["Crustacés cuits","moderation","Crevettes, crabe… cuits, décortiqués et nature : un petit morceau occasionnel. Jamais la carapace.",["crevette","crevettes","crabe","homard","langoustine"]],
+ ["Artichaut","moderation","Non toxique, mais fibreux et peu digeste. Un petit morceau de cœur cuit au plus.",[]],
+ ["Poivron","moderation","Rouge ou jaune, cuit, sans graines : un petit morceau. Peu d'intérêt pour un chat.",[]],
  // ---------- PRODUITS POUR CHAT ----------
  ["Croquettes pour chat","ok","Conçues pour les chats. Si c'est un aliment « complet », elles peuvent constituer tout le repas, à la ration indiquée selon le poids.",["croquettes","croquette","croquettes chat"]],
  ["Pâtée pour chat","ok","Conçue pour les chats et riche en eau, ce qui aide les reins et la vessie. Vérifie si c'est un aliment « complet » ou « complémentaire ».",["pâtée","patee","sachet fraîcheur","boîte pour chat","terrine pour chat"]],
@@ -74,6 +85,7 @@ window.DB = [
  ["Myrtilles","ok","Quelques-unes en friandise.",["myrtille"]],
  ["Pomme (sans pépins ni trognon)","ok","Petit morceau épluché, sans pépins.",["pomme"]],
  ["Herbe à chat (cataire)","ok","Faite pour eux : aide à éliminer les boules de poils.",["cataire","herbe","herbe à chat"]],
+ ["Chou-fleur cuit","ok","Cuit à la vapeur, nature, en petits morceaux.",["chou-fleur","chou fleur"]],
  ["Eau","ok","Indispensable : toujours de l'eau fraîche à disposition.",[]],
 ];
 

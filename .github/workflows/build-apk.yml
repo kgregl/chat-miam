@@ -28,6 +28,9 @@ jobs:
           npm ci
           npm run copy-libs
 
+      - name: Télécharger le modèle de reconnaissance d'images
+        run: npm run get-model
+
       - name: Créer le projet Android
         run: |
           npx cap add android
@@ -36,6 +39,11 @@ jobs:
           # Icône de l'appli (générée depuis resources/icon*.svg)
           cp -r resources/android/res/. android/app/src/main/res/
           npx cap sync android
+
+      - name: Clé de signature fixe (mises à jour sans désinstaller)
+        run: |
+          mkdir -p ~/.android
+          cp signing/debug.keystore ~/.android/debug.keystore
 
       - name: Compiler l'APK
         working-directory: android
