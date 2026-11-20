@@ -4,5 +4,15 @@
   "webDir": "www",
   "android": {
     "allowMixedContent": false
+  },
+  "plugins": {
+    "BackgroundRunner": {
+      "label": "fr.greg.chatmiam.rappels",
+      "src": "runners/rappels.js",
+      "event": "verifierRappels",
+      "repeat": true,
+      "interval": 720,
+      "autoStart": true
+    }
   }
 }

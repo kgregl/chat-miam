@@ -11,10 +11,13 @@
 <main>
   <h1>🐱 Mon chat peut-il manger ça ?</h1>
 
+  <div id="recallBanner" class="alert hidden"></div>
+
   <div class="tabs">
-    <button data-tab="scan" class="on">▮▯▮ Scanner</button>
-    <button data-tab="photo">📷 Photo</button>
-    <button data-tab="search">🔎 Chercher</button>
+    <button data-tab="scan" class="on">▮▯▮<br>Scanner</button>
+    <button data-tab="photo">📷<br>Photo</button>
+    <button data-tab="search">🔎<br>Chercher</button>
+    <button data-tab="moncat">🐱<br>Mon chat</button>
     <button data-tab="settings" aria-label="Réglages">⚙️</button>
   </div>
 
@@ -39,7 +42,9 @@
     <input id="foodInput" type="file" accept="image/*" capture="environment" class="hidden">
     <label class="big alt" for="ingrInput">📄 Photo d'une liste d'ingrédients</label>
     <input id="ingrInput" type="file" accept="image/*" capture="environment" class="hidden">
-    <p class="hint">Tout se passe sur ton téléphone, sans Internet et gratuitement. Pour un aliment, cadre-le seul, en gros plan. Pour une liste d'ingrédients, prends-la bien à plat, nette et lisible.</p>
+    <label class="big alt" for="plantInput">🌿 Photo d'une plante</label>
+    <input id="plantInput" type="file" accept="image/*" capture="environment" class="hidden">
+    <p class="hint">Tout se passe sur ton téléphone, sans Internet et gratuitement. Pour un aliment, cadre-le seul, en gros plan. Pour une liste d'ingrédients, prends-la bien à plat, nette et lisible. Pour une plante, cadre une feuille ou une fleur (ou l'étiquette du pot).</p>
     <img id="photoPreview" class="preview hidden" alt="">
   </section>
 
@@ -56,6 +61,39 @@
     <button id="askBtn" class="big alt hidden">Pas dans la liste ? Demander à Claude</button>
   </section>
 
+  <!-- MON CHAT -->
+  <section id="tab-moncat" class="hidden">
+    <div class="card">
+      <h3 id="profilTitre">🐱 Profil de ton chat</h3>
+      <p class="hint" style="margin-top:0">Les verdicts s'adaptent à ton chat (âge, maladies, allergies).</p>
+      <label class="fld">Nom<input id="pNom" type="text" placeholder="ex : Minou"></label>
+      <label class="fld">Âge
+        <select id="pAge"><option value="chaton">Chaton (moins d'1 an)</option><option value="adulte">Adulte</option><option value="senior">Senior (10 ans et plus)</option></select></label>
+      <label class="fld">Poids (kg)<input id="pPoids" type="text" inputmode="decimal" placeholder="ex : 4,5"></label>
+      <label class="check"><input id="pSter" type="checkbox"> Stérilisé</label>
+      <p class="lbl">Problèmes de santé</p>
+      <div id="pCond"></div>
+      <label class="fld">Allergies alimentaires<input id="pAll" type="text" placeholder="ex : poulet, poisson"></label>
+      <button id="pSave" class="big" style="margin-top:12px">Enregistrer le profil</button>
+      <p id="pSaved" class="hint"></p>
+    </div>
+    <div class="card">
+      <h3>⭐ Favoris</h3>
+      <div id="favList"></div>
+    </div>
+    <div class="card">
+      <h3>🔔 Alertes de rappel</h3>
+      <p class="hint" style="margin-top:0">L'appli vérifie si un produit de tes favoris ou de ton historique fait l'objet d'un rappel officiel (RappelConso), à chaque ouverture et en arrière-plan.</p>
+      <p id="notifState" class="hint"></p>
+      <button id="notifBtn" class="big alt">Activer les notifications</button>
+    </div>
+    <div class="card">
+      <h3>🕘 Historique</h3>
+      <div id="histList"></div>
+      <button id="histClear" class="big alt hidden">Effacer l'historique</button>
+    </div>
+  </section>
+
   <!-- RÉGLAGES -->
   <section id="tab-settings" class="card hidden">
     <h3>Analyse par Claude (optionnel)</h3>
@@ -64,6 +102,11 @@
     <button id="saveKey" class="big" style="margin-top:10px">Enregistrer</button>
     <p id="keyState" class="hint"></p>
     <p class="hint">Sans clé, tout le reste fonctionne : scanner, photo, recherche.</p>
+    <h3 style="margin-top:20px">Reconnaissance des plantes (optionnel, gratuit)</h3>
+    <p class="hint">Crée un compte gratuit sur my.plantnet.org (500 identifications par jour), copie ta clé API (laisse « exposer ma clé » décoché) et colle-la ici. Sans clé, l'appli lit seulement l'étiquette du pot.</p>
+    <input id="plantKey" type="password" placeholder="Clé Pl@ntNet" autocomplete="off">
+    <button id="savePlantKey" class="big" style="margin-top:10px">Enregistrer</button>
+    <p id="plantKeyState" class="hint"></p>
   </section>
 
   <div id="result"></div>
@@ -81,7 +124,9 @@
 <script src="lib/mobilenet.min.js"></script>
 <script src="lib/tesseract.min.js"></script>
 <script src="db.js"></script>
+<script src="plants.js"></script>
 <script src="vision.js"></script>
 <script src="app.js"></script>
+<script src="moncat.js"></script>
 </body>
 </html>

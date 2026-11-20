@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.6.2",
+    "@capacitor/background-runner": "^3.0.0",
     "@capacitor/core": "^8.6.2",
     "@tensorflow-models/mobilenet": "^2.1.1",
     "@tensorflow/tfjs": "^4.22.0",

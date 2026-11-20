@@ -62,3 +62,17 @@ a{color:var(--accent)}
 .chips button{border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:99px;padding:8px 14px;font-size:.92rem;font-weight:600}
 label.big.alt{display:flex}
 .list li.empty{color:var(--muted);font-size:.9rem;line-height:1.45;cursor:default}
+.tabs{grid-template-columns:repeat(4,1fr) auto}
+.tabs button{font-size:.8rem;line-height:1.25;padding:8px 4px}
+.perso{background:rgba(224,122,63,.12);border-left:4px solid var(--accent);border-radius:8px;padding:8px 10px;margin:4px 0 10px}
+.perso ul{margin:4px 0 0;padding-left:18px}
+.favbtn{margin-top:10px;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:99px;padding:8px 14px;font-weight:700;font-size:.9rem}
+.favbtn.on{background:var(--accent);color:#fff}
+.fld{display:block;margin-top:10px;font-size:.9rem;color:var(--muted)}
+.fld input,.fld select{display:block;width:100%;margin-top:4px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1rem}
+.check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:.95rem}
+.check input{width:20px;height:20px;accent-color:var(--accent)}
+.lbl{margin:14px 0 0;font-size:.9rem;color:var(--muted)}
+#recallBanner{margin-bottom:12px}
+#recallBanner ul{margin:6px 0;padding-left:18px}
+.list .t br{display:none}

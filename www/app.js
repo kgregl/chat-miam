@@ -9,7 +9,8 @@ const store = { get(k){ try{return localStorage.getItem(k)}catch(e){return null}
 /* ---------- Onglets ---------- */
 document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => {
   document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b));
-  ["scan","photo","search","settings"].forEach(t => $("tab-"+t).classList.toggle("hidden", t !== b.dataset.tab));
+  ["scan","photo","search","moncat","settings"].forEach(t => $("tab-"+t).classList.toggle("hidden", t !== b.dataset.tab));
+  if (b.dataset.tab === "moncat" && window.openMonChat) openMonChat();
   $("result").innerHTML = "";
   if (b.dataset.tab !== "scan") stopScan();
 });
@@ -48,7 +49,7 @@ function renderList(){
   $("list").innerHTML = rows.map(([n,v]) => `<li data-n="${esc(n)}"><span class="dot ${v}"></span><span class="n">${esc(n)}</span><span class="t">${LABEL[v]}</span></li>`).join("");
   $("list").querySelectorAll("li").forEach(li => li.onclick = () => {
     const r = DB.find(x => x[0] === li.dataset.n);
-    showVerdict({aliment:r[0], verdict:r[1], raison:r[2]});
+    showVerdict({aliment:r[0], dbName:r[0], verdict:r[1], raison:r[2], isPlant: r[0].startsWith("Plante : ")});
   });
   if (t && !rows.length) $("list").innerHTML = `<li class="empty">Pas encore dans la liste. Essaie un mot plus général (ex : « fromage » plutôt que « camembert »), scanne le code-barres, ou photographie la liste d'ingrédients.</li>`;
   $("askBtn").classList.toggle("hidden", !(t && !rows.length && store.get("apiKey")));
@@ -104,7 +105,7 @@ function analyseProduct(p){
 
   const transformed = (p.nova_group && p.nova_group >= 3);
   return {
-    aliment: name, image: p.image_front_small_url, verdict, raison: reasons.join(" "),
+    aliment: name, image: p.image_front_small_url, verdict, raison: reasons.join(" "), ingr,
     ingredients_a_risque: found,
     conseil: verdict === "ok"
       ? (transformed ? "C'est un produit transformé : même sans ingrédient toxique, ce n'est pas un repas pour chat. Petite quantité seulement." : "Reste en petite quantité : l'alimentation pour chat doit rester la base.")
@@ -176,7 +177,7 @@ function analysePetFood(p, kind){
   else if (kind === "animal") raison = "Aliment pour animaux sans ingrédient toxique repéré. Vérifie qu'il est bien destiné aux chats.";
   else raison = "Aliment conçu pour les chats, sans ingrédient à risque repéré.";
 
-  return {aliment:name, image:p.image_front_small_url, verdict, tag, raison, ingredients_a_risque:risques, infos,
+  return {aliment:name, image:p.image_front_small_url, verdict, tag, raison, ingredients_a_risque:risques, infos, ingr,
     conseil: verdict === "ok" ? "Respecte la ration indiquée sur l'emballage selon le poids de ton chat, et fais toute transition d'aliment sur 7 jours environ." : "",
     note:"Analyse automatique (Open Pet Food Facts / Open Food Facts) : les données peuvent être incomplètes."};
 }
@@ -232,6 +233,7 @@ async function lookupBarcode(code){
     const kind = petKind(p);
     v = kind ? analysePetFood(p, kind) : analyseProduct(p);
   }
+  if (p) { v.code = code; }
   if (recall) {
     const fin = recall.date_de_fin_de_la_procedure_de_rappel;
     const actif = !fin || new Date(fin) >= new Date(new Date().toDateString());
@@ -351,7 +353,7 @@ $("foodInput").onchange = async e => {
   const best = guesses[0];
   if (best && best.prob >= 0.25 && best.dbName) {
     const r = DB.find(x => x[0] === best.dbName);
-    showVerdict({aliment: best.label, verdict: r[1], raison: r[2],
+    showVerdict({aliment: best.label, dbName: r[0], verdict: r[1], raison: r[2],
       note: `Reconnu sur la photo avec ${Math.round(best.prob * 100)} % de confiance.`});
     addAlternatives(guesses.slice(1), f);
     return;
@@ -363,7 +365,7 @@ $("foodInput").onchange = async e => {
   const m = matchText(text);
   if (m.length) {
     const r = m[0].row;
-    showVerdict({aliment: r[0], verdict: r[1], raison: r[2], note: `Reconnu grâce au texte de l'étiquette (« ${m[0].hit} »).`});
+    showVerdict({aliment: r[0], dbName: r[0], verdict: r[1], raison: r[2], note: `Reconnu grâce au texte de l'étiquette (« ${m[0].hit} »).`});
     const others = m.slice(1, 4).map(o => ({label: o.row[0], dbName: o.row[0]}))
       .concat(guesses.filter(g => g.dbName && g.prob >= 0.12).map(g => ({label: g.label, dbName: g.dbName})));
     addAlternatives(others, f);
@@ -393,7 +395,7 @@ function addAlternatives(rest, file){
 function bindChips(){
   $("result").querySelectorAll(".chips button").forEach(b => b.onclick = () => {
     const r = DB.find(x => x[0] === b.dataset.db);
-    showVerdict({aliment: b.dataset.l, verdict: r[1], raison: r[2]});
+    showVerdict({aliment: b.dataset.l, dbName: r[0], verdict: r[1], raison: r[2]});
   });
 }
 function bindClaude(file){

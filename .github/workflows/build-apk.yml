@@ -38,6 +38,11 @@ jobs:
           sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n</manifest>#' android/app/src/main/AndroidManifest.xml
           # Icône de l'appli (générée depuis resources/icon*.svg)
           cp -r resources/android/res/. android/app/src/main/res/
+          # Moteur JS du plugin de tâches en arrière-plan (alertes de rappel)
+          sed -i "s#dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'#dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'\n        dirs '../../node_modules/@capacitor/background-runner/android/src/main/libs', 'libs'#" android/app/build.gradle
+          grep -n "flatDir" -A3 android/app/build.gradle
+          # Notifications (Android 13+)
+          grep -q POST_NOTIFICATIONS android/app/src/main/AndroidManifest.xml || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n</manifest>#' android/app/src/main/AndroidManifest.xml
           npx cap sync android
           # Numéro de version qui augmente à chaque compilation (permet la mise à jour)
           sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/; s/versionName \"[^\"]*\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
