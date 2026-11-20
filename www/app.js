@@ -50,7 +50,8 @@ function renderList(){
     const r = DB.find(x => x[0] === li.dataset.n);
     showVerdict({aliment:r[0], verdict:r[1], raison:r[2]});
   });
-  $("askBtn").classList.toggle("hidden", !t);
+  if (t && !rows.length) $("list").innerHTML = `<li class="empty">Pas encore dans la liste. Essaie un mot plus général (ex : « fromage » plutôt que « camembert »), scanne le code-barres, ou photographie la liste d'ingrédients.</li>`;
+  $("askBtn").classList.toggle("hidden", !(t && !rows.length && store.get("apiKey")));
 }
 $("q").oninput = renderList;
 document.querySelectorAll(".filters button").forEach(b => b.onclick = () => {
@@ -58,6 +59,19 @@ document.querySelectorAll(".filters button").forEach(b => b.onclick = () => {
   document.querySelectorAll(".filters button").forEach(x => x.classList.toggle("on", x === b));
   renderList();
 });
+
+/* ---------- Retrouver des aliments de la base dans un texte (étiquette) ---------- */
+function matchText(text){
+  const t = " " + norm(text).replace(/[^a-z0-9]+/g, " ") + " ";
+  const res = [];
+  for (const row of DB) {
+    const terms = [row[0].split(/[(\/,]/)[0], ...row[3]].map(x => norm(x).replace(/[^a-z0-9]+/g, " ").trim()).filter(x => x.length >= 4);
+    let best = 0, hit = "";
+    for (const term of terms) if (t.includes(" " + term + " ") && term.length > best) { best = term.length; hit = term; }
+    if (best) res.push({row, score: best, hit});
+  }
+  return res.sort((a, b) => b.score - a.score);
+}
 
 /* ---------- Analyse d'un produit Open Food Facts ---------- */
 function analyseProduct(p){
@@ -325,21 +339,37 @@ function toJpegB64(file, max = 1280){
 function showPreview(f){ $("photoPreview").src = URL.createObjectURL(f); $("photoPreview").classList.remove("hidden"); }
 
 /* Photo d'un aliment : MobileNet sur le téléphone */
+const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
+
 $("foodInput").onchange = async e => {
   const f = e.target.files[0]; e.target.value = ""; if (!f) return;
   showPreview(f);
-  loading(_mobilenet ? "Je regarde ta photo…" : "Chargement du modèle (la 1re fois)…");
-  let guesses;
-  try { guesses = await classifyFood(f); }
-  catch (x) { error("La reconnaissance d'image n'a pas pu démarrer sur ce téléphone. Utilise l'onglet Chercher."); return; }
+  loading(_mobilenet ? "Je regarde ta photo…" : "Chargement du modèle (la 1re fois, quelques secondes)…");
+  let guesses = [];
+  try { guesses = await withTimeout(classifyFood(f), 90000); }
+  catch (x) { console.error(x); guesses = []; }
   const best = guesses[0];
-  if (!best || best.prob < 0.12 || !best.dbName) {
-    showUnknown(guesses, f); return;
+  if (best && best.prob >= 0.25 && best.dbName) {
+    const r = DB.find(x => x[0] === best.dbName);
+    showVerdict({aliment: best.label, verdict: r[1], raison: r[2],
+      note: `Reconnu sur la photo avec ${Math.round(best.prob * 100)} % de confiance.`});
+    addAlternatives(guesses.slice(1), f);
+    return;
   }
-  const r = DB.find(x => x[0] === best.dbName);
-  showVerdict({aliment: best.label, verdict: r[1], raison: r[2],
-    note: `Reconnu sur la photo avec ${Math.round(best.prob * 100)} % de confiance.`});
-  addAlternatives(guesses.slice(1), f);
+  // Pas d'aliment reconnu avec certitude (souvent un pot ou un emballage) : on lit l'étiquette
+  loading("Je lis l'étiquette…");
+  let text = "";
+  try { text = await withTimeout(readText(f), 90000); } catch (x) { console.error(x); }
+  const m = matchText(text);
+  if (m.length) {
+    const r = m[0].row;
+    showVerdict({aliment: r[0], verdict: r[1], raison: r[2], note: `Reconnu grâce au texte de l'étiquette (« ${m[0].hit} »).`});
+    const others = m.slice(1, 4).map(o => ({label: o.row[0], dbName: o.row[0]}))
+      .concat(guesses.filter(g => g.dbName && g.prob >= 0.12).map(g => ({label: g.label, dbName: g.dbName})));
+    addAlternatives(others, f);
+    return;
+  }
+  showUnknown(guesses.filter(g => g.prob >= 0.05), f);
 };
 
 function showUnknown(guesses, file){
@@ -347,7 +377,7 @@ function showUnknown(guesses, file){
   $("result").innerHTML = `<div class="verdict inconnu"><span class="badge">INCERTAIN</span>
     <h2>Je ne suis pas sûr de reconnaître cet aliment</h2>
     ${opts.length ? `<p>C'est peut-être :</p><div class="chips">${opts.map(o => `<button data-db="${esc(o.dbName)}" data-l="${esc(o.label)}">${esc(o.label)}</button>`).join("")}</div>` : ""}
-    <p class="hint">La reconnaissance hors ligne connaît surtout des fruits, légumes et plats courants. Sinon, tape le nom dans l'onglet Chercher.</p>
+    <p class="hint">La reconnaissance hors ligne connaît surtout des fruits, légumes et plats courants. Pour un produit emballé, scanne son code-barres ou photographie sa liste d'ingrédients. Sinon, tape son nom dans l'onglet Chercher.</p>
     ${store.get("apiKey") ? `<button id="claudeTry" class="big alt">Demander à Claude</button>` : ""}</div>`;
   bindChips(); bindClaude(file);
 }
@@ -406,6 +436,9 @@ function refreshKeyState(){
   $("keyState").textContent = k ? "✅ Clé enregistrée (…" + k.slice(-4) + ")" : "Aucune clé enregistrée.";
 }
 $("saveKey").onclick = () => { store.set("apiKey", $("apiKey").value.trim()); $("apiKey").value = ""; refreshKeyState(); };
+
+window.addEventListener("error", ev => error("Erreur inattendue : " + (ev.message || "inconnue") + ". Réessaie ou utilise l'onglet Chercher."));
+window.addEventListener("unhandledrejection", ev => error("Erreur inattendue : " + ((ev.reason && ev.reason.message) || ev.reason || "inconnue") + ". Réessaie ou utilise l'onglet Chercher."));
 
 renderList();
 refreshKeyState();
