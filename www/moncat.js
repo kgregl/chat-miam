@@ -253,7 +253,7 @@ $("notifBtn").onclick = async () => {
 function plantFromGenus(genus, family){
   const p = PLANTS.find(x => (x[4] || []).includes(genus));
   if (p) return {verdict: p[1], raison: p[2], nomListe: p[0]};
-  if (family && PLANT_FAMILIES[family]) return {verdict: PLANT_FAMILIES[family][0], raison: PLANT_FAMILIES[family][1]};
+  if (family && PLANT_FAMILIES[family]) return {verdict: PLANT_FAMILIES[family][0], raison: PLANT_FAMILIES[family][1], famille: family};
   return null;
 }
 async function plantnetIdentify(b64, key){
@@ -298,7 +298,8 @@ $("plantInput").onchange = async e => {
         return;
       }
       showVerdict({aliment: `${nomFr} (${sp.scientificNameWithoutAuthor})`, verdict: m.verdict, raison: m.raison, isPlant: true, tag: "Plante",
-        infos: [...(best.score < 0.4 ? ["Identification peu sûre : vérifie avec une autre photo (feuille ou fleur bien nette)."] : []),
+        infos: [...(m.famille ? [`Cette espèce précise n'est pas dans ma liste : verdict basé sur sa famille botanique (${m.famille}).`] : []),
+                ...(best.score < 0.4 ? ["Identification peu sûre : vérifie avec une autre photo (feuille ou fleur bien nette)."] : []),
                 ...(others.length ? ["Autres possibilités : " + others.join(" ; ")] : [])],
         note: `Confiance : ${Math.round(best.score * 100)} %. ${PLANTNET_CREDIT}`});
     } catch (x) {

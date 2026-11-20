@@ -413,7 +413,7 @@ $("ingrInput").onchange = async e => {
   showPreview(f);
   loading("Lecture du texte…");
   let text;
-  try { text = await readText(f, pct => { const r = $("result").querySelector(".big"); if (r) r.innerHTML = `<span class="spinner"></span> Lecture du texte… ${pct} %`; }); }
+  try { text = await withTimeout(readText(f, pct => { const r = $("result").querySelector(".big"); if (r) r.innerHTML = `<span class="spinner"></span> Lecture du texte… ${pct} %`; }), 120000); }
   catch (x) { error("La lecture de texte n'a pas pu démarrer sur ce téléphone."); return; }
   const clean = text.replace(/\s+/g, " ").trim();
   if (clean.length < 15) { error("Je n'arrive pas à lire de texte sur cette photo. Rapproche-toi, évite les reflets et prends la liste bien à plat."); return; }

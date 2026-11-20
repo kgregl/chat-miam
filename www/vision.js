@@ -108,7 +108,7 @@ async function getOcr(onProgress){
     workerPath: abs("lib/worker.min.js"),
     corePath: abs("lib/tess-core/tesseract-core-simd-lstm.wasm.js"),
     langPath: abs("lib/tess-lang"),
-    gzip: true,
+    gzip: false,   // Android modifie les fichiers .gz dans l'APK : on embarque la version décompressée
     cacheMethod: "none",
     logger: m => { if (onProgress && m.status === "recognizing text") onProgress(Math.round(m.progress * 100)); }
   });

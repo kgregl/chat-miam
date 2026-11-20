@@ -2,9 +2,9 @@
   "name": "chat-miam",
   "version": "1.0.0",
   "private": true,
-  "description": "Mon chat peut-il manger ça ? — scanner d'aliments pour chat",
+  "description": "Mon chat peut-il manger \u00e7a ? \u2014 scanner d'aliments pour chat",
   "scripts": {
-    "copy-libs": "mkdir -p www/lib/tess-core www/lib/tess-lang && cp node_modules/@zxing/library/umd/index.min.js www/zxing.min.js && cp node_modules/@tensorflow/tfjs/dist/tf.min.js node_modules/@tensorflow-models/mobilenet/dist/mobilenet.min.js node_modules/tesseract.js/dist/tesseract.min.js node_modules/tesseract.js/dist/worker.min.js www/lib/ && cp node_modules/tesseract.js-core/tesseract-core-simd-lstm.wasm.js www/lib/tess-core/ && cp node_modules/@tesseract.js-data/fra/4.0.0_best_int/fra.traineddata.gz www/lib/tess-lang/",
+    "copy-libs": "mkdir -p www/lib/tess-core www/lib/tess-lang && cp node_modules/@zxing/library/umd/index.min.js www/zxing.min.js && cp node_modules/@tensorflow/tfjs/dist/tf.min.js node_modules/@tensorflow-models/mobilenet/dist/mobilenet.min.js node_modules/tesseract.js/dist/tesseract.min.js node_modules/tesseract.js/dist/worker.min.js www/lib/ && cp node_modules/tesseract.js-core/tesseract-core-simd-lstm.wasm.js www/lib/tess-core/ && gunzip -c node_modules/@tesseract.js-data/fra/4.0.0_best_int/fra.traineddata.gz > www/lib/tess-lang/fra.traineddata",
     "get-model": "node scripts/get-model.mjs"
   },
   "dependencies": {
